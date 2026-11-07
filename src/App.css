@@ -1,0 +1,209 @@
+
+.app {
+  width: 100%;
+  min-height: 100vh;
+  padding: 32px;
+}
+
+.app-header {
+  margin-bottom: 40px;
+}
+
+.app-header h1 {
+  font-size: 2rem;
+  margin-bottom: 8px;
+}
+
+.app-header p {
+  color: #94a3b8;
+}
+
+.board h2 {
+  margin-bottom: 24px;
+}
+
+.board-columns {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 20px;
+}
+
+.board-column {
+  background-color: #1e293b;
+  border: 1px solid #334155;
+  border-radius: 12px;
+  padding: 20px;
+  min-height: 400px;
+}
+
+.board-column h3 {
+  margin-top: 0;
+}
+
+@media (max-width: 1000px) {
+  .board-columns {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 600px) {
+  .app {
+    padding: 16px;
+  }
+
+  .board-columns {
+    grid-template-columns: 1fr;
+  }
+}
+
+
+.task-card {
+  background-color: #334155;
+  border: 1px solid #475569;
+  border-radius: 10px;
+  padding: 16px;
+  margin-top: 12px;
+}
+
+.task-card h4 {
+  margin: 0 0 8px;
+  font-size: 1rem;
+}
+
+.task-card p {
+  color: #cbd5e1;
+  font-size: 0.875rem;
+  line-height: 1.5;
+}
+
+.task-priority {
+  display: inline-block;
+  margin-top: 8px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #93c5fd;
+}
+
+.new-task-button {
+  background: #2563eb;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 12px 18px;
+  margin-bottom: 24px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.new-task-button:hover {
+  background: #1d4ed8;
+}
+
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 16px;
+  z-index: 1000;
+}
+
+.task-modal {
+  background: #1e293b;
+  border: 1px solid #475569;
+  border-radius: 14px;
+  padding: 24px;
+  width: 100%;
+  max-width: 520px;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+}
+
+.modal-header h2 {
+  margin: 0;
+}
+
+.modal-header button {
+  background: transparent;
+  color: white;
+  border: none;
+  font-size: 24px;
+  cursor: pointer;
+}
+
+
+
+.task-form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 24px;
+}
+
+.task-form label {
+  font-weight: 600;
+}
+
+.task-form input,
+.task-form textarea,
+.task-form select {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #475569;
+  border-radius: 8px;
+  background: #0f172a;
+  color: #f8fafc;
+}
+
+.task-form input:focus,
+.task-form textarea:focus,
+.task-form select:focus {
+  outline: 2px solid #60a5fa;
+  outline-offset: 2px;
+}
+
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 20px;
+}
+
+.form-actions button {
+  padding: 10px 16px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.primary-button {
+  background: #2563eb;
+  color: white;
+  border: none;
+}
+
+.primary-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.form-error {
+  color: #fca5a5;
+}
+
+.task-review {
+  margin-top: 24px;
+}
+
+.task-review p {
+  overflow-wrap: anywhere;
+  line-height: 1.6;
+}
