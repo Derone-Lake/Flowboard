@@ -2,16 +2,13 @@
 import { useState } from 'react'
 
 function TaskModal({ onClose, onCreateTask }) {
-  // State for task information
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
   const [priority, setPriority] = useState('Medium')
-
-  // State for validation and review
   const [error, setError] = useState('')
   const [isReviewing, setIsReviewing] = useState(false)
+  const [isSaving, setIsSaving] = useState(false)
 
-  // Validate the form before displaying the review screen
   function handleReview(event) {
     event.preventDefault()
 
@@ -24,24 +21,39 @@ function TaskModal({ onClose, onCreateTask }) {
     setIsReviewing(true)
   }
 
-  // Return to the form without losing entered information
   function handleEdit() {
+    if (isSaving) return
+
+    setError('')
     setIsReviewing(false)
   }
 
-  // Send the confirmed task information to App.jsx
-  function handleConfirm() {
+  async function handleConfirm() {
+    if (isSaving) return
+
     if (!title.trim()) {
       setError('Please enter a task title.')
       setIsReviewing(false)
       return
     }
 
-    onCreateTask({
-      title: title.trim(),
-      description: description.trim(),
-      priority: priority,
-    })
+    setIsSaving(true)
+    setError('')
+
+    try {
+      await onCreateTask({
+        title: title.trim(),
+        description: description.trim(),
+        priority,
+      })
+    } catch (saveError) {
+      console.error('Task save failed:', saveError)
+      setError(
+        'Could not confirm the save. Your task is still here; check your connection before retrying.'
+      )
+    } finally {
+      setIsSaving(false)
+    }
   }
 
   return (
@@ -51,6 +63,7 @@ function TaskModal({ onClose, onCreateTask }) {
         role="dialog"
         aria-modal="true"
         aria-labelledby="task-modal-title"
+        aria-busy={isSaving}
       >
         <div className="modal-header">
           <h2 id="task-modal-title">
@@ -60,6 +73,7 @@ function TaskModal({ onClose, onCreateTask }) {
           <button
             type="button"
             onClick={onClose}
+            disabled={isSaving}
             aria-label="Close task form"
           >
             ×
@@ -125,10 +139,7 @@ function TaskModal({ onClose, onCreateTask }) {
             )}
 
             <div className="form-actions">
-              <button
-                type="button"
-                onClick={onClose}
-              >
+              <button type="button" onClick={onClose}>
                 Cancel
               </button>
 
@@ -155,10 +166,17 @@ function TaskModal({ onClose, onCreateTask }) {
               <strong>Priority:</strong> {priority}
             </p>
 
+            {error && (
+              <p className="form-error" role="alert">
+                {error}
+              </p>
+            )}
+
             <div className="form-actions">
               <button
                 type="button"
                 onClick={handleEdit}
+                disabled={isSaving}
               >
                 Edit
               </button>
@@ -167,8 +185,9 @@ function TaskModal({ onClose, onCreateTask }) {
                 type="button"
                 className="primary-button"
                 onClick={handleConfirm}
+                disabled={isSaving}
               >
-                Confirm Task
+                {isSaving ? 'Saving...' : 'Confirm Task'}
               </button>
             </div>
           </div>
