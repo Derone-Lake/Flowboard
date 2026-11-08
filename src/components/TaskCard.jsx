@@ -1,7 +1,7 @@
 
 import { useDraggable } from '@dnd-kit/core'
 
-function TaskCard({ task, disabled = false }) {
+function TaskCard({ task, disabled = false, onDeleteTask }) {
   const {
     attributes,
     listeners,
@@ -18,10 +18,20 @@ function TaskCard({ task, disabled = false }) {
       ? `translate3d(${transform.x}px, ${transform.y}px, 0)`
       : undefined,
     opacity: isDragging ? 0.65 : 1,
-    cursor: disabled ? 'wait' : 'grab',
-    touchAction: 'none',
     position: 'relative',
     zIndex: isDragging ? 10 : 'auto',
+  }
+
+  function handleDelete() {
+    if (disabled || !onDeleteTask) return
+
+    const confirmed = window.confirm(
+      `Are you sure you want to delete "${task.title}"?`
+    )
+
+    if (confirmed) {
+      onDeleteTask(task.id)
+    }
   }
 
   return (
@@ -29,15 +39,32 @@ function TaskCard({ task, disabled = false }) {
       ref={setNodeRef}
       className="task-card"
       style={style}
-      {...attributes}
-      {...listeners}
     >
-      <h4>{task.title}</h4>
-      <p>{task.description}</p>
+      <div
+        {...attributes}
+        {...listeners}
+        style={{
+          cursor: disabled ? 'wait' : 'grab',
+          touchAction: 'none',
+        }}
+      >
+        <h4>{task.title}</h4>
+        <p>{task.description}</p>
 
-      <span className="task-priority">
-        {task.priority}
-      </span>
+        <span className="task-priority">
+          {task.priority}
+        </span>
+      </div>
+
+      <button
+        type="button"
+        className="delete-task-button"
+        onClick={handleDelete}
+        disabled={disabled}
+        aria-label={`Delete ${task.title}`}
+      >
+        Delete
+      </button>
     </article>
   )
 }

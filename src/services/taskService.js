@@ -1,41 +1,43 @@
 
-import { supabase } from "./supabaseClient";
+import { supabase } from './supabaseClient'
 
 // Retrieve tasks belonging to the authenticated user.
+// Supabase Row Level Security restricts visible records.
 export async function getTasks() {
   const { data, error } = await supabase
-    .from("tasks")
-    .select("*")
-    .order("created_at", { ascending: false });
+    .from('tasks')
+    .select('*')
+    .order('created_at', { ascending: false })
 
   if (error) {
-    throw error;
+    throw error
   }
 
-  return data;
+  return data
 }
 
 // Create a new task in PostgreSQL.
 export async function createTask(userId, task) {
   const { data, error } = await supabase
-    .from("tasks")
+    .from('tasks')
     .insert({
       user_id: userId,
       title: task.title,
-      description: task.description ?? "",
+      description: task.description ?? '',
       priority: task.priority,
-      status: "To Do"
+      status: 'To Do',
     })
     .select()
-    .single();
+    .single()
 
   if (error) {
-    throw error;
+    throw error
   }
 
-  return data;
+  return data
 }
 
+// Update a task's Kanban status.
 export async function updateTaskStatus(taskId, status) {
   const validStatuses = [
     'To Do',
@@ -60,14 +62,31 @@ export async function updateTaskStatus(taskId, status) {
   }
 
   return data
-
-
-
-
-
-
-
-
 }
 
+// Permanently delete a task owned by the current user.
+export async function deleteTask(taskId, userId) {
+  if (!taskId || !userId) {
+    throw new Error('Task ID and user ID are required.')
+  }
 
+  const { data, error } = await supabase
+    .from('tasks')
+    .delete()
+    .eq('task_id', taskId)
+    .eq('user_id', userId)
+    .select('task_id')
+    .maybeSingle()
+
+  if (error) {
+    throw error
+  }
+
+  if (!data) {
+    throw new Error(
+      'Task was not deleted. It may not exist or you may not have permission.'
+    )
+  }
+
+  return data
+}

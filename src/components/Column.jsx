@@ -2,7 +2,7 @@
 import { useDroppable } from '@dnd-kit/core'
 import TaskCard from './TaskCard'
 
-function Column({ title, tasks, isMoving }) {
+function Column({ title, tasks, isMoving, onDeleteTask }) {
   const { setNodeRef, isOver } = useDroppable({
     id: `column:${title}`,
   })
@@ -28,6 +28,7 @@ function Column({ title, tasks, isMoving }) {
             key={task.id}
             task={task}
             disabled={isMoving}
+            onDeleteTask={onDeleteTask}
           />
         ))
       )}

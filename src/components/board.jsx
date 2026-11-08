@@ -18,7 +18,7 @@ const statuses = [
   'Done',
 ]
 
-function Board({ tasks, onMoveTask, isMoving }) {
+function Board({ tasks, onMoveTask, onDeleteTask, isMoving }) {
   const sensors = useSensors(
     useSensor(PointerSensor, {
       activationConstraint: { distance: 8 },
@@ -38,8 +38,9 @@ function Board({ tasks, onMoveTask, isMoving }) {
 
   async function handleDragEnd(event) {
     const { active, over } = event
-    console.log("Task being moved:", active.id)
-    console.log("Destination:", over?.id)
+
+    console.log('Task being moved:', active.id)
+    console.log('Destination:', over?.id)
 
     if (!over || isMoving) return
 
@@ -75,6 +76,7 @@ function Board({ tasks, onMoveTask, isMoving }) {
               (task) => task.status === status
             )}
             isMoving={isMoving}
+            onDeleteTask={onDeleteTask}
           />
         ))}
       </div>

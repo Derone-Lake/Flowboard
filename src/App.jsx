@@ -1,5 +1,5 @@
 
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import Board from './components/board'
 import TaskModal from './components/TaskModal'
 import './App.css'
@@ -10,6 +10,7 @@ import {
   getTasks,
   createTask,
   updateTaskStatus,
+  deleteTask,
 } from './services/taskService'
 
 // Map PostgreSQL's task_id to the id used by React components.
@@ -30,9 +31,14 @@ function App() {
   const [isLoading, setIsLoading] = useState(true)
   const [loadError, setLoadError] = useState('')
 
-  // Drag-and-drop state
+  // Task operation state
   const [isMoving, setIsMoving] = useState(false)
+  const [isDeleting, setIsDeleting] = useState(false)
   const [moveError, setMoveError] = useState('')
+  const [deleteError, setDeleteError] = useState('')
+
+  // Prevent overlapping task modifications.
+  const operationInProgress = useRef(false)
 
   // Authenticate and retrieve saved tasks.
   useEffect(() => {
@@ -96,10 +102,12 @@ function App() {
 
   // Move a task between columns and persist its status.
   async function handleMoveTask(taskId, newStatus) {
-    if (isMoving) return
+    if (operationInProgress.current) return
 
+    operationInProgress.current = true
     setIsMoving(true)
     setMoveError('')
+    setDeleteError('')
 
     try {
       const updatedTask = await updateTaskStatus(
@@ -122,7 +130,43 @@ function App() {
         'Could not save the task movement. Please try again.'
       )
     } finally {
+      operationInProgress.current = false
       setIsMoving(false)
+    }
+  }
+
+  // Delete a task only after Supabase confirms success.
+  async function handleDeleteTask(taskId) {
+    if (operationInProgress.current) return
+
+    if (!userId) {
+      setDeleteError('Your session is not ready.')
+      return
+    }
+
+    operationInProgress.current = true
+    setIsDeleting(true)
+    setDeleteError('')
+    setMoveError('')
+
+    try {
+      await deleteTask(taskId, userId)
+
+      // Remove the task from React after database confirmation.
+      setTasks((previousTasks) =>
+        previousTasks.filter(
+          (task) => String(task.id) !== String(taskId)
+        )
+      )
+    } catch (error) {
+      console.error('Task deletion failed:', error)
+
+      setDeleteError(
+        'Could not delete the task. Please try again.'
+      )
+    } finally {
+      operationInProgress.current = false
+      setIsDeleting(false)
     }
   }
 
@@ -139,7 +183,13 @@ function App() {
         <button
           type="button"
           className="new-task-button"
-          disabled={isLoading || !userId || Boolean(loadError)}
+          disabled={
+            isLoading ||
+            !userId ||
+            Boolean(loadError) ||
+            isMoving ||
+            isDeleting
+          }
           onClick={() => setIsModalOpen(true)}
         >
           + New Task
@@ -161,15 +211,26 @@ function App() {
           </p>
         )}
 
+        {deleteError && (
+          <p role="alert" className="form-error">
+            {deleteError}
+          </p>
+        )}
+
         {isMoving && (
           <p role="status">Saving task movement...</p>
+        )}
+
+        {isDeleting && (
+          <p role="status">Deleting task...</p>
         )}
 
         {!isLoading && !loadError && (
           <Board
             tasks={tasks}
             onMoveTask={handleMoveTask}
-            isMoving={isMoving}
+            onDeleteTask={handleDeleteTask}
+            isMoving={isMoving || isDeleting}
           />
         )}
       </section>
